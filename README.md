@@ -15,10 +15,10 @@ This project is a robust time tracking and invoicing solution designed for freel
 ### ✨ Features
 
   * **Client & Project Management:** Create and manage clients and projects, setting hourly rates and monthly time limits.
-  * **Real-time & Manual Time Tracking:** Track your time with a live timer or add manual time entries for past work.
+  * **Real-time & Manual Time Tracking:** Track your time with a live timer, or add manual time entries for past work.
   * **Task Management (To-Do List):** Create and manage a to-do list with priorities, deadlines, and project associations.
   * **Expense Tracking:** Record project-related expenses, including mileage with automatic cost calculation.
-  * **Invoice Generation:** Generate professional PDF invoices from your time entries and expenses.
+  * **Invoice Generation:** Generate professional PDF invoices from your tracked time entries and expenses.
   * **Reporting & Analytics:** Visualize your tracked time and revenue with detailed reports and charts.
   * **Company Settings:** Customize your company details, logo, and invoice letterhead for a professional touch.
   * **Cross-Platform:** A single codebase that runs on Android, iOS, Windows, macOS, and Linux.
