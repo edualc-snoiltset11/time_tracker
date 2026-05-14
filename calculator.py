@@ -41,6 +41,15 @@ def square_root(a: float) -> float:
     return math.sqrt(a)
 
 
+def nth_root(a: float, n: float) -> float:
+    if n == 0:
+        raise ValueError("O índice da raiz não pode ser zero.")
+    if a < 0 and int(n) == n and int(n) % 2 == 0:
+        raise ValueError("Raiz par de número negativo não é permitida.")
+    sign = -1 if a < 0 else 1
+    return sign * (abs(a) ** (1 / n))
+
+
 def factorial(a: float) -> int:
     if a < 0 or a != int(a):
         raise ValueError("Fatorial só é definido para inteiros não negativos.")
@@ -53,6 +62,67 @@ def logarithm(a: float, base: float) -> float:
     return math.log(a, base)
 
 
+def natural_log(a: float) -> float:
+    if a <= 0:
+        raise ValueError("ln só é definido para a > 0.")
+    return math.log(a)
+
+
+def log10(a: float) -> float:
+    if a <= 0:
+        raise ValueError("log10 só é definido para a > 0.")
+    return math.log10(a)
+
+
+def exp_e(a: float) -> float:
+    return math.exp(a)
+
+
+def absolute(a: float) -> float:
+    return abs(a)
+
+
+def percentage(a: float, b: float) -> float:
+    """Calcula a% de b."""
+    return (a / 100) * b
+
+
+def percent_change(a: float, b: float) -> float:
+    """Variação percentual de a para b."""
+    if a == 0:
+        raise ValueError("Variação percentual indefinida quando o valor inicial é zero.")
+    return (b - a) / abs(a) * 100
+
+
+def hypotenuse(a: float, b: float) -> float:
+    return math.hypot(a, b)
+
+
+def gcd(a: float, b: float) -> int:
+    if a != int(a) or b != int(b):
+        raise ValueError("MDC só é definido para inteiros.")
+    return math.gcd(int(a), int(b))
+
+
+def lcm(a: float, b: float) -> int:
+    if a != int(a) or b != int(b):
+        raise ValueError("MMC só é definido para inteiros.")
+    return math.lcm(int(a), int(b))
+
+
+def floor_div(a: float, b: float) -> float:
+    if b == 0:
+        raise ZeroDivisionError("Divisão inteira por zero não é permitida.")
+    return a // b
+
+
+def trig(func, radians: bool):
+    def wrapper(a: float) -> float:
+        x = a if radians else math.radians(a)
+        return func(x)
+    return wrapper
+
+
 def compile_function(expression: str):
     code = compile(expression, "<f(x)>", "eval")
 
@@ -60,19 +130,6 @@ def compile_function(expression: str):
         return eval(code, {"__builtins__": {}}, {**SAFE_NAMES, "x": x})
 
     return f
-
-
-def integrate(expression: str, lower: float, upper: float, n: int = 1000) -> float:
-    """Integral numérica de f(x) entre lower e upper usando Simpson composto."""
-    if n % 2 != 0:
-        n += 1
-    f = compile_function(expression)
-    h = (upper - lower) / n
-    total = f(lower) + f(upper)
-    for i in range(1, n):
-        x = lower + i * h
-        total += (4 if i % 2 else 2) * f(x)
-    return total * h / 3
 
 
 def derivative(expression: str, x: float, h: float = 1e-5) -> float:
@@ -87,6 +144,14 @@ def read_number(prompt: str) -> float:
             return float(input(prompt).replace(",", "."))
         except ValueError:
             print("Valor inválido. Digite um número.")
+
+
+def read_choice(prompt: str, options: tuple[str, ...]) -> str:
+    while True:
+        answer = input(prompt).strip().lower()
+        if answer in options:
+            return answer
+        print(f"Opção inválida. Use: {', '.join(options)}")
 
 
 def binary_op(func, symbol):
@@ -112,12 +177,39 @@ def log_op():
     print(f"Resultado: log_{base}({a}) = {logarithm(a, base)}")
 
 
-def integral_op():
-    expr = input("f(x) = ").strip()
-    lower = read_number("Limite inferior: ")
-    upper = read_number("Limite superior: ")
-    result = integrate(expr, lower, upper)
-    print(f"Resultado: ∫({expr}) dx de {lower} a {upper} ≈ {result}")
+def nth_root_op():
+    a = read_number("Radicando (a): ")
+    n = read_number("Índice (n): ")
+    print(f"Resultado: ⁿ√a = {n}√{a} = {nth_root(a, n)}")
+
+
+def percentage_op():
+    a = read_number("Percentual (a%): ")
+    b = read_number("Sobre o valor (b): ")
+    print(f"Resultado: {a}% de {b} = {percentage(a, b)}")
+
+
+def percent_change_op():
+    a = read_number("Valor inicial: ")
+    b = read_number("Valor final: ")
+    print(f"Resultado: variação = {percent_change(a, b):.4f}%")
+
+
+def trig_op(func, name):
+    def runner():
+        unit = read_choice("Unidade (r=radianos, d=graus): ", ("r", "d"))
+        a = read_number("Ângulo: ")
+        result = trig(func, radians=(unit == "r"))(a)
+        print(f"Resultado: {name}({a} {'rad' if unit == 'r' else '°'}) = {result}")
+    return runner
+
+
+def average_op():
+    raw = input("Números separados por espaço ou vírgula: ").replace(",", " ").split()
+    if not raw:
+        raise ValueError("Nenhum número informado.")
+    nums = [float(x) for x in raw]
+    print(f"Resultado: média de {len(nums)} valores = {sum(nums) / len(nums)}")
 
 
 def derivative_op():
@@ -132,13 +224,29 @@ OPERATIONS = {
     "2": ("Subtrair (a - b)", binary_op(subtract, "-")),
     "3": ("Multiplicar (a * b)", binary_op(multiply, "*")),
     "4": ("Dividir (a / b)", binary_op(divide, "/")),
-    "5": ("Potência (a ^ b)", binary_op(power, "^")),
+    "5": ("Divisão inteira (a // b)", binary_op(floor_div, "//")),
     "6": ("Módulo (a % b)", binary_op(modulo, "%")),
-    "7": ("Raiz quadrada (√a)", unary_op(square_root, "√")),
-    "8": ("Fatorial (a!)", unary_op(factorial, "fact")),
-    "9": ("Logaritmo (log_base(a))", log_op),
-    "10": ("Integral definida ∫ f(x) dx", integral_op),
-    "11": ("Derivada f'(x) num ponto", derivative_op),
+    "7": ("Potência (a ^ b)", binary_op(power, "^")),
+    "8": ("Raiz quadrada (√a)", unary_op(square_root, "√")),
+    "9": ("Raiz enésima (ⁿ√a)", nth_root_op),
+    "10": ("Fatorial (a!)", unary_op(factorial, "fact")),
+    "11": ("Valor absoluto |a|", unary_op(absolute, "|·|")),
+    "12": ("Exponencial (eˣ)", unary_op(exp_e, "exp")),
+    "13": ("Logaritmo natural (ln a)", unary_op(natural_log, "ln")),
+    "14": ("Logaritmo base 10 (log a)", unary_op(log10, "log10")),
+    "15": ("Logaritmo qualquer base", log_op),
+    "16": ("Seno", trig_op(math.sin, "sin")),
+    "17": ("Cosseno", trig_op(math.cos, "cos")),
+    "18": ("Tangente", trig_op(math.tan, "tan")),
+    "19": ("Porcentagem (a% de b)", percentage_op),
+    "20": ("Variação percentual", percent_change_op),
+    "21": ("Hipotenusa √(a²+b²)", binary_op(hypotenuse, "⊿")),
+    "22": ("MDC (gcd)", binary_op(gcd, "gcd")),
+    "23": ("MMC (lcm)", binary_op(lcm, "lcm")),
+    "24": ("Média aritmética de N valores", average_op),
+    "25": ("Derivada f'(x) num ponto", derivative_op),
+    "26": ("Piso ⌊a⌋", unary_op(math.floor, "floor")),
+    "27": ("Teto ⌈a⌉", unary_op(math.ceil, "ceil")),
 }
 
 
@@ -148,8 +256,8 @@ def main() -> None:
     while True:
         print("\nEscolha a operação:")
         for key, (label, _) in OPERATIONS.items():
-            print(f"  {key}. {label}")
-        print("  0. Sair")
+            print(f"  {key:>2}. {label}")
+        print("   0. Sair")
 
         choice = input("Opção: ").strip()
         if choice == "0":
